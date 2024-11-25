@@ -1,0 +1,32 @@
+image: luckydye/mise:latest
+
+variables:
+  GIT_PUSH_TOKEN: $GIT_PUSH_TOKEN # A Gitlab access token to push to the repo
+  CI_IMAGE_TAG: registry.example.com/$CI_PROJECT_PATH:ci
+  CI_IMAGE_PLATFORM: linux/amd64
+
+# Enable to build docker image in CI
+# Build CI Image:
+#   image: docker:latest
+#   stage: .pre
+#   allow_failure: true
+#   rules:
+#     - if: $CI_COMMIT_MESSAGE =~ /^build:/
+#       when: never
+#     - if: '($CI_COMMIT_BRANCH == "main")'
+#       when: always
+#     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+#       when: always
+#   script:
+#     - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+#     - docker buildx build --pull --platform=$CI_IMAGE_PLATFORM . --push --tag $CI_IMAGE_TAG
+
+# Setup project inside CI without a project specific image
+setup:
+  only:
+    - never
+  before_script:
+    - mise install -y
+    - task setup
+  script:
+    - echo "This job needs to be extended"

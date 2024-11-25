@@ -1,0 +1,55 @@
+version: 3
+
+silent: true
+
+env:
+  DOCKER_IMAGE_TAG: luckydye/mise:latest
+  DOCKER_PLATFORM: linux/amd64,linux/arm64
+  DOCKER_LOCAL_PLATFORM: linux/arm64
+  DOCKER_REGISTRY: docker.io
+
+dotenv: [".env"]
+
+tasks:
+  default: task -l
+
+  build:
+    desc: Build multi-arch octane image and put out
+    internal: true
+    cmds:
+      - docker buildx create --name=container --driver=docker-container --use
+      - docker buildx build --platform={{.DOCKER_PLATFORM}} -t {{.DOCKER_IMAGE_TAG}} --output={{.OUTPUT}} src
+      - task: clear
+      - task: prune
+
+  push:
+    desc: Build and push image to remote registry
+    cmds:
+      - 'echo "Tag: {{.DOCKER_IMAGE_TAG}}"'
+      - 'echo "Platform: {{.DOCKER_LOCAL_PLATFORM}}"'
+      - task: login
+      - task: build
+        vars:
+          OUTPUT: type=registry --push
+
+  load:
+    desc: Build and load image to local docker
+    cmds:
+      - 'echo "Tag: {{.DOCKER_IMAGE_TAG}}"'
+      - 'echo "Platform: {{.DOCKER_LOCAL_PLATFORM}}"'
+      - task: build
+        vars:
+          DOCKER_PLATFORM: "{{.DOCKER_LOCAL_PLATFORM}}"
+          OUTPUT: type=docker --load
+
+  prune:
+    desc: Prune dangling images
+    cmd: docker image prune --force --filter=dangling=true
+
+  clear:
+    desc: Remove buildx container after build
+    cmd: docker buildx rm container
+
+  run:
+    desc: Run the octane docker image
+    cmd: docker run -it --rm {{.DOCKER_IMAGE_TAG}} sh
