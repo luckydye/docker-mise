@@ -11,8 +11,8 @@ tasks:
     desc: Build multi-arch octane image and put out
     internal: true # Run with push
     cmds:
-      - defer: clear
-      - defer: prune
+      - defer: task clear
+      - defer: task prune
       - docker buildx create --name=mise-container --driver=docker-container --use
       - docker buildx build --platform={{.DOCKER_PLATFORM}} -t {{.DOCKER_IMAGE_TAG}} --output={{.OUTPUT}} src
 
