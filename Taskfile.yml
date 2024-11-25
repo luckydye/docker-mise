@@ -1,21 +1,15 @@
 version: 3
 
-silent: true
-
 env:
   DOCKER_IMAGE_TAG: luckydye/mise:latest
   DOCKER_PLATFORM: linux/amd64,linux/arm64
   DOCKER_LOCAL_PLATFORM: linux/arm64
   DOCKER_REGISTRY: docker.io
 
-dotenv: [".env"]
-
 tasks:
-  default: task -l
-
   build:
     desc: Build multi-arch octane image and put out
-    internal: true
+    internal: true # Run with push
     cmds:
       - docker buildx create --name=container --driver=docker-container --use
       - docker buildx build --platform={{.DOCKER_PLATFORM}} -t {{.DOCKER_IMAGE_TAG}} --output={{.OUTPUT}} src
@@ -47,8 +41,8 @@ tasks:
     cmd: docker image prune --force --filter=dangling=true
 
   clear:
-    desc: Remove buildx container after build
-    cmd: docker buildx rm container
+    desc: Remove buildx mise-container after build
+    cmd: docker buildx rm mise-container
 
   run:
     desc: Run the octane docker image
