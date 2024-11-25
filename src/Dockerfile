@@ -8,6 +8,7 @@ ENV PATH=$PATH:/root/.local/share/mise/shims
 
 # install project tools
 COPY .mise.toml .mise.toml
+RUN mise trust .mise.toml
 RUN mise install -y && mise reshim
 RUN pip install ansible && mise reshim
 

@@ -11,17 +11,16 @@ tasks:
     desc: Build multi-arch octane image and put out
     internal: true # Run with push
     cmds:
-      - docker buildx create --name=container --driver=docker-container --use
+      - defer: clear
+      - defer: prune
+      - docker buildx create --name=mise-container --driver=docker-container --use
       - docker buildx build --platform={{.DOCKER_PLATFORM}} -t {{.DOCKER_IMAGE_TAG}} --output={{.OUTPUT}} src
-      - task: clear
-      - task: prune
 
   push:
     desc: Build and push image to remote registry
     cmds:
       - 'echo "Tag: {{.DOCKER_IMAGE_TAG}}"'
       - 'echo "Platform: {{.DOCKER_LOCAL_PLATFORM}}"'
-      - task: login
       - task: build
         vars:
           OUTPUT: type=registry --push
